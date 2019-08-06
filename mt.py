@@ -153,7 +153,7 @@ def convert(batch, device):
             'dst_seq': to_device_batch([y for _, y in batch])}
 
 
-def main():
+def train():
     args = parse_args()
     src_data, src_vocab, src_words = load_text(args.SOURCE)
     dst_data, dst_vocab, dst_words = load_text(args.TARGET)
@@ -191,4 +191,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    train()
