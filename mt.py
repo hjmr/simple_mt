@@ -186,8 +186,8 @@ def train():
     trainer.run()
 
     if args.save is not None:
-        # Save a snapshot
-        chainer.serializers.save_npz(args.save, trainer)
+        # chainer.serializers.save_npz(args.save, trainer)
+        chainer.serializers.save_npz(args.save, model)
 
 
 if __name__ == '__main__':
