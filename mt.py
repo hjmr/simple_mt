@@ -18,12 +18,12 @@ def sequence_embed(embed, xs):
 
 
 class SimpleMT(chainer.Chain):
-    def __init__(self, src_vocab, dst_vocab, n_units):
+    def __init__(self, src_vocab, dst_vocab, w2v_dim, n_units):
         super(SimpleMT, self).__init__()
         with self.init_scope():
-            self.embed_src = L.EmbedID(len(src_vocab), n_units)
-            self.embed_dst = L.EmbedID(len(dst_vocab), n_units)
-            self.lstm = L.NStepLSTM(n_layers=1, in_size=n_units, out_size=n_units, dropout=0.1)
+            self.embed_src = L.EmbedID(len(src_vocab), w2v_dim)
+            self.embed_dst = L.EmbedID(len(dst_vocab), w2v_dim)
+            self.lstm = L.NStepLSTM(n_layers=1, in_size=w2v_dim, out_size=n_units, dropout=0.1)
             self.lin = L.Linear(in_size=n_units, out_size=len(dst_vocab))
         self.src_vocab = src_vocab
         self.dst_vocab = dst_vocab

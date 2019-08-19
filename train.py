@@ -99,7 +99,7 @@ def train():
     target_data = load_text(args.TARGET, target_vocab)
     train_data = [(s, t) for s, t in six.moves.zip(src_data, target_data)]
 
-    model = mt.SimpleMT(src_vocab, target_vocab, args.num_units)
+    model = mt.SimpleMT(src_vocab, target_vocab, args.w2v_dim, args.num_units)
 
     optimizer = chainer.optimizers.Adam()
     optimizer.setup(model)
