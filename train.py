@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import io
 
 import six
+import progressbar
+
 import numpy
 import chainer
 from chainer import training
@@ -18,6 +21,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description='simple machine translator')
     parser.add_argument('SOURCE', type=str, help='source file.')
     parser.add_argument('TARGET', type=str, help='target file.')
+    parser.add_argument('SOURCE_VOCAB', type=str, help='vocabulary file for source text.')
+    parser.add_argument('TARGET_VOCAB', type=str, help='vocabulary file for target text.')
     parser.add_argument('-b', '--batch_size', type=int, default=100,
                         help='the number of sentence paris in each mini-patch.')
     parser.add_argument('-e', '--epoch', type=int, default=100,
@@ -42,24 +47,30 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_text(file_name):
-    lines = []
-    vocab = {}
-    words = {}
-    vocab['<eos>'] = EOS
-    words[EOS] = '<eos>'
-    vocab['<unk>'] = UNK
-    words[UNK] = '<eos>'
-    with open(file_name) as f:
-        for l in f:
-            line = []
-            for w in l.strip().split():
-                if w not in vocab:
-                    vocab[w] = len(vocab)
-                    words[vocab[w]] = w
-                line.append(vocab[w])
-            lines.append(line)
-    return lines, vocab, words
+def load_vocabulary(path):
+    with io.open(path, encoding='utf-8') as f:
+        word_ids = {line.strip(): i + 2 for i, line in enumerate(f)}
+    word_ids['<EOS>'] = EOS
+    word_ids['<UNK>'] = UNK
+    return word_ids
+
+
+def count_lines(path):
+    with io.open(path, encoding='utf-8') as f:
+        return sum([1 for _ in f])
+
+
+def load_text(path, vocabulary):
+    n_lines = count_lines(path)
+    bar = progressbar.ProgressBar()
+    data = []
+    print('loading...: {}'.format(path))
+    with io.open(path, encoding='utf-8') as f:
+        for line in bar(f, max_value=n_lines):
+            words = line.strip().split()
+            array = numpy.array([vocabulary.get(w, UNK) for w in words], numpy.int32)
+            data.append(array)
+    return data
 
 
 @chainer.dataset.converter()
@@ -82,11 +93,13 @@ def convert(batch, device):
 
 def train():
     args = parse_args()
-    src_data, src_vocab, src_words = load_text(args.SOURCE)
-    dst_data, dst_vocab, dst_words = load_text(args.TARGET)
-    train_data = [(s, t) for s, t in six.moves.zip(src_data, dst_data)]
+    src_vocab = load_vocabulary(args.SOURCE_VOCAB)
+    target_vocab = load_vocabulary(args.TARGET_VOCAB)
+    src_data = load_text(args.SOURCE, src_vocab)
+    target_data = load_text(args.TARGET, target_vocab)
+    train_data = [(s, t) for s, t in six.moves.zip(src_data, target_data)]
 
-    model = mt.SimpleMT(src_vocab, dst_vocab, args.num_units)
+    model = mt.SimpleMT(src_vocab, target_vocab, args.num_units)
 
     optimizer = chainer.optimizers.Adam()
     optimizer.setup(model)
