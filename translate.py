@@ -19,6 +19,11 @@ def parse_args():
     parser.add_argument('SOURCE', type=str, help='a source text file.')
     parser.add_argument('SOURCE_VOCAB', type=str, help='a source vocabulary file.')
     parser.add_argument('TARGET_VOCAB', type=str, help='a target vocabulary file.')
+    parser.add_argument('-d', '--device', type=str, default='-1',
+                        help='Device specifier. Either ChainerX device '
+                        'specifier or an integer. If non-negative integer, '
+                        'CuPy arrays with specified device id are used. If '
+                        'negative integer, NumPy arrays are used')
     parser.add_argument('-w', '--w2v_dim', type=int, default=100,
                         help='the dimension of embedded vector (Word2Vec).')
     parser.add_argument('-u', '--num_units', type=int, default=100,
@@ -63,6 +68,11 @@ def translate():
 
     model = mt.SimpleMT(source_vocab, target_vocab, args.w2v_dim, args.num_units)
     chainer.serializers.load_npz(args.MODEL, model)
+
+    device = chainer.get_device(args.device)
+    model.to_device(device)
+    device.use()
+
     for s in source_data:
         r = model.translate([model.xp.array(s)])[0]
         source_sentence = ''.join([source_words[x] for x in s])
