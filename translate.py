@@ -47,7 +47,7 @@ def load_text(path, vocabulary):
     with io.open(path, encoding='utf-8') as f:
         for line in bar(f, max_value=n_lines):
             words = line.strip().split()
-            array = numpy.array([vocabulary.get(w, UNK) for w in words], numpy.int32)
+            array = numpy.array([vocabulary.get(w, UNK) for w in words], numpy.int64)
             data.append(array)
     return data
 
