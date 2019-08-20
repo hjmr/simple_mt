@@ -64,7 +64,7 @@ def translate():
     model = mt.SimpleMT(source_vocab, target_vocab, args.w2v_dim, args.num_units)
     chainer.serializers.load_npz(args.MODEL, model)
     for s in source_data:
-        r = model.translate([numpy.ndarray(s, numpy.int32)])[0]
+        r = model.translate([model.xp.array(s)])[0]
         source_sentence = ''.join([source_words[x] for x in s])
         result_sentence = ''.join([target_words[y] for y in r])
         print("# source : {}".format(source_sentence))
