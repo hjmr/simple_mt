@@ -42,8 +42,8 @@ def parse_args():
                         help='the number of neurons in each of LSTM layers.')
     parser.add_argument('--log-interval', type=int, default=200,
                         help='the number of iteration to show log.')
-    parser.add_argument('--snapshot-interval', type=int, default=4000,
-                        help='the number of iteration to save snapshot of the model.')
+    # parser.add_argument('--snapshot-interval', type=int, default=4000,
+    #                     help='the number of iteration to save snapshot of the model.')
     return parser.parse_args()
 
 
@@ -78,28 +78,28 @@ def convert(batch, device):
     def to_device_batch(batch):
         if device is None:
             return batch
-        src_xp = chainer.backend.get_array_module(*batch)
+        source_xp = chainer.backend.get_array_module(*batch)
         xp = device.xp
-        concat = src_xp.concatenate(batch, axis=0)
+        concat = source_xp.concatenate(batch, axis=0)
         sections = list(numpy.cumsum(
             [len(x) for x in batch[:-1]], dtype=numpy.int64))
-        concat_dst = device.send(concat)
-        batch_dst = xp.split(concat_dst, sections)
-        return batch_dst
+        concat_target = device.send(concat)
+        batch_target = xp.split(concat_target, sections)
+        return batch_target
 
-    return {'src_seq': to_device_batch([x for x, _ in batch]),
-            'dst_seq': to_device_batch([y for _, y in batch])}
+    return {'source_seq': to_device_batch([x for x, _ in batch]),
+            'target_seq': to_device_batch([y for _, y in batch])}
 
 
 def train():
     args = parse_args()
-    src_vocab = load_vocabulary(args.SOURCE_VOCAB)
+    source_vocab = load_vocabulary(args.SOURCE_VOCAB)
     target_vocab = load_vocabulary(args.TARGET_VOCAB)
-    src_data = load_text(args.SOURCE, src_vocab)
+    source_data = load_text(args.SOURCE, source_vocab)
     target_data = load_text(args.TARGET, target_vocab)
-    train_data = [(s, t) for s, t in six.moves.zip(src_data, target_data)]
+    train_data = [(s, t) for s, t in six.moves.zip(source_data, target_data)]
 
-    model = mt.SimpleMT(src_vocab, target_vocab, args.w2v_dim, args.num_units)
+    model = mt.SimpleMT(source_vocab, target_vocab, args.w2v_dim, args.num_units)
 
     optimizer = chainer.optimizers.Adam()
     optimizer.setup(model)
@@ -119,9 +119,9 @@ def train():
         ['epoch', 'iteration', 'main/loss', 'main/perp', 'elapsed_time']),
         trigger=(args.log_interval, 'iteration'))
 
-    trainer.extend(
-        extensions.snapshot(filename='snapshot_epoch_{.updater.iteration}'),
-        trigger=(args.snapshot_interval, 'iteration'))
+    # trainer.extend(
+    #     extensions.snapshot(filename='snapshot_epoch_{.updater.iteration}'),
+    #     trigger=(args.snapshot_interval, 'iteration'))
 
     trainer.run()
 
