@@ -82,7 +82,7 @@ def convert(batch, device):
         xp = device.xp
         concat = source_xp.concatenate(batch, axis=0)
         sections = list(numpy.cumsum(
-            [len(x) for x in batch[:-1]], dtype=numpy.int64))
+            [len(x) for x in batch[:-1]], dtype=numpy.int32))
         concat_target = device.send(concat)
         batch_target = xp.split(concat_target, sections)
         return batch_target

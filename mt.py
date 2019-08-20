@@ -29,7 +29,7 @@ class SimpleMT(chainer.Chain):
         self.target_vocab = target_vocab
 
     def forward(self, source_seq, target_seq):
-        eos = self.xp.array([EOS], numpy.int64)
+        eos = self.xp.array([EOS], numpy.int32)
         target_in = [F.concat([eos, dst], axis=0) for dst in target_seq]
         target_out = [F.concat([dst, eos], axis=0) for dst in target_seq]
 
@@ -56,7 +56,7 @@ class SimpleMT(chainer.Chain):
         with chainer.no_backprop_mode(), chainer.using_config('train', False):
             source_seq_emb = sequence_embed(self.embed_src, source_seq)
             h, c, _ = self.lstm(None, None, source_seq_emb)
-            target_seq = self.xp.full(batch, EOS, numpy.int64)
+            target_seq = self.xp.full(batch, EOS, numpy.int32)
             result = []
             for i in range(max_length):
                 target_seq_emb = self.embed_dst(target_seq)
@@ -64,7 +64,7 @@ class SimpleMT(chainer.Chain):
                 h, c, target_seq = self.lstm(h, c, target_seq_emb)
                 hid_seq = F.concat(target_seq, axis=0)
                 tmp = self.lin(hid_seq)
-                out_seq = self.xp.argmax(tmp.array, axis=1).astype(numpy.int64)
+                out_seq = self.xp.argmax(tmp.array, axis=1).astype(numpy.int32)
                 result.append(out_seq)
 
         # Using `xp.concatenate(...)` instead of `xp.stack(result)` here to
