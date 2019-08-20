@@ -65,7 +65,7 @@ def translate():
     chainer.serializers.load_npz(args.MODEL, model)
     for s in source_data:
         r = model.translate([numpy.ndarray(s, numpy.int32)])[0]
-        sourse_sentence = ''.join([source_words[x] for x in s])
+        source_sentence = ''.join([source_words[x] for x in s])
         result_sentence = ''.join([target_words[y] for y in r])
         print("# source : {}".format(source_sentence))
         print("# result : {}".format(result_sentence))
