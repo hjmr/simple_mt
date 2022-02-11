@@ -8,7 +8,7 @@ mccabe==0.6.1
 numpy==1.17.0
 pipdeptree==0.13.2
 progressbar2==3.42.0
-protobuf==3.9.1
+protobuf==3.15.0
 pycodestyle==2.5.0
 pylint==2.3.1
 python-utils==2.3.0
