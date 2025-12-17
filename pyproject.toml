@@ -5,7 +5,7 @@ description = ""
 authors = ["hjmr <2620990+hjmr@users.noreply.github.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">3.9.0"
 chainer = "^7.8.1"
 
 [build-system]
